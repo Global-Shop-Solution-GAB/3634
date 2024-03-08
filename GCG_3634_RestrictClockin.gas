@@ -1,0 +1,84 @@
+Program.Sub.ScreenSU.Start
+Program.Sub.ScreenSU.End
+
+Program.Sub.Preflight.Start
+
+Program.Sub.Preflight.End
+
+Program.Sub.Main.Start
+'RAN 03-04-16
+'Quote 7536-1 GUI job list lock - Great Western Valve
+
+
+F.Intrinsic.Control.SetErrorHandler("Main_Err")
+F.Intrinsic.Control.ClearErrors
+
+V.Local.sError.Declare(String)
+
+
+
+F.Intrinsic.Control.If(V.Caller.Hook,=,15741)
+	F.Intrinsic.Control.CallSub(Bdfload)
+F.Intrinsic.Control.EndIf
+
+F.Intrinsic.Control.ExitSub
+
+F.Intrinsic.Control.Label("Main_Err")
+F.Intrinsic.Control.If(V.Ambient.ErrorNumber,<>,0)
+	Function.Intrinsic.String.Concat("Project: GCG_3634_RestrictClockin.gas",V.Ambient.Newline,V.Ambient.Newline,"Subroutine: ",V.Ambient.CurrentSubroutine,V.Ambient.NewLine,"Error Occurred ",V.Ambient.ErrorNumber," with description ",V.Ambient.ErrorDescription,V.Local.sError)
+	F.Intrinsic.UI.Msgbox(V.Local.sError)
+Function.Intrinsic.Control.EndIf
+
+
+Program.Sub.Main.End
+
+Program.Sub.BDFLoad.Start
+F.Intrinsic.Control.SetErrorHandler("BDFLoad_Err")
+F.Intrinsic.Control.ClearErrors
+
+V.Local.sError.Declare(String)
+
+'GUI Time Clock
+'Hook 15741
+
+
+V.Local.iRowCnt.Declare(Long)
+V.Local.i.Declare(Long)
+V.Local.sWriteRow.Declare(String)
+
+'Error Handling
+
+'F.Intrinsic.Debug.InvokeDebugger
+F.Intrinsic.Debug.Stop
+
+'Loads name of BDF and ID into memory
+F.Intrinsic.BDF.Load("AUX002","AUX002")
+'Copies structure of BDF and given the name "Clone"
+F.Intrinsic.BDF.Clone("AUX002","Clone")
+'Returns the number of rows of BDF and returns it to iRowCnt
+F.Intrinsic.BDF.ReadRowCount("AUX002",V.Local.iRowCnt)
+F.Intrinsic.Math.Sub(V.Local.iRowCnt,1,V.Local.iRowCnt)
+'Starting from 0 and looping through each row, 1 row at a time.
+F.Intrinsic.Control.For(V.Local.i,0,V.Local.iRowCnt,1)
+	'Reads data from AUX002
+	V.Local.sWriteRow.Set("")
+	F.Intrinsic.BDF.WriteRow("Clone",V.Local.sWriteRow)
+'Loops thru all records until no records exist
+F.Intrinsic.Control.Next(V.Local.i)
+F.Intrinsic.Debug.Stop
+'Writes cloneBDF to original BDF to be read by CORE
+F.Intrinsic.BDF.Save("Clone","AUX002")
+
+
+F.Intrinsic.Control.ExitSub
+
+F.Intrinsic.Control.Label("BDFLoad_Err")
+F.Intrinsic.Control.If(V.Ambient.ErrorNumber,<>,0)
+	Function.Intrinsic.String.Concat("Project: GCG_3634_RestrictClockin.gas",V.Ambient.Newline,V.Ambient.Newline,"Subroutine: ",V.Ambient.CurrentSubroutine,V.Ambient.NewLine,"Error Occurred ",V.Ambient.ErrorNumber," with description ",V.Ambient.ErrorDescription,V.Local.sError)
+	F.Intrinsic.UI.Msgbox(V.Local.sError)
+Function.Intrinsic.Control.EndIf
+
+
+Program.Sub.BDFLoad.End
+
+
